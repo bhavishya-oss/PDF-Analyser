@@ -41,16 +41,12 @@ st.markdown("""
 st.markdown('<p class="header-style">📄 AI PDF Insight Extractor</p>', unsafe_allow_html=True)
 st.write("Upload a PDF document (e.g., a hotel brochure, menu, or manual) and let AI extract the most important details for you.")
 
-# Sidebar for API Key if not implicitly in .env
-with st.sidebar:
-    st.header("⚙️ Configuration")
-    user_api_key = st.text_input("Gemini API Key", type="password", help="Enter your Google Gemini API Key. If left blank, it will try to use the one from .env file.")
-    if user_api_key:
-        genai.configure(api_key=user_api_key)
-    elif os.getenv("GEMINI_API_KEY"):
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-    else:
-        st.warning("⚠️ Please enter a Gemini API Key to proceed.")
+# Configure Gemini from .env
+env_key = os.getenv("GEMINI_API_KEY", "")
+if env_key and env_key != "your_api_key_here":
+    genai.configure(api_key=env_key)
+else:
+    st.warning("⚠️ Please ensure your Gemini API Key is set in the .env file!")
 
 # Functions
 def extract_text_from_pdf(pdf_bytes):
@@ -106,8 +102,8 @@ if uploaded_file is not None:
     
     if st.button("Analyze PDF"):
         env_key = os.getenv("GEMINI_API_KEY", "")
-        if not user_api_key and (not env_key or env_key == "your_api_key_here"):
-             st.error("⚠️ Please provide a valid Gemini API Key in the sidebar on the left.")
+        if not env_key or env_key == "your_api_key_here":
+             st.error("⚠️ Please provide a valid Gemini API Key in the .env file.")
         else:
             with st.spinner("Extracting text and analyzing with AI... This might take a few seconds."):
                 # 1. Extract text
